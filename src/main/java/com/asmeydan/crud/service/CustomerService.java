@@ -3,6 +3,7 @@ package com.asmeydan.crud.service;
 import com.asmeydan.crud.model.Customer;
 import com.asmeydan.crud.repository.CustomerRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.jasypt.encryption.StringEncryptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,10 +14,11 @@ import java.util.Optional;
 @Service
 public class CustomerService {
     private final CustomerRepository customerRepository;
+    private final StringEncryptor stringEncryptor;
 
-    @Autowired
-    public CustomerService(CustomerRepository customerRepository) {
+    public CustomerService(CustomerRepository customerRepository, StringEncryptor stringEncryptor) {
         this.customerRepository = customerRepository;
+        this.stringEncryptor = stringEncryptor;
     }
 
     public Optional<Customer> findCustomerById(int id) {
@@ -28,6 +30,8 @@ public class CustomerService {
     }
 
     public Customer addCustomer(Customer customer) {
+        String encryptedPass = stringEncryptor.encrypt(customer.getPassword().trim());
+        customer.setPassword(encryptedPass);
         return (Customer) customerRepository.save(customer);
     }
 
